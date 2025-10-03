@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechDrop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f7fa;
+      color: #1f2937;
+    }
+    @keyframes flash-cart {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    .animate-flash { animation: flash-cart 0.3s ease-out; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center h-16">
+      <a href="#" class="text-2xl font-bold text-indigo-700">TechDrop</a>
+      <nav class="hidden md:flex space-x-6">
+        <a href="#shop" class="hover:text-indigo-700">Shop</a>
+        <a href="#" class="hover:text-indigo-700">Audio</a>
+        <a href="#" class="hover:text-indigo-700">Wearables</a>
+      </nav>
+      <button id="cart-button" class="relative p-2 rounded hover:bg-indigo-50">
+        🛒
+        <span id="cart-count" class="absolute -top-1 -right-1 px-1 text-xs font-bold text-white bg-red-600 rounded-full">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    <section class="bg-indigo-700 h-64 flex flex-col items-center justify-center text-white text-center p-4">
+      <h1 class="text-4xl font-bold mb-2">Gadgets Drop</h1>
+      <p class="text-lg mb-4">Smart Devices for a Modern Life.</p>
+      <a href="#shop" class="px-4 py-2 bg-white text-indigo-700 font-semibold rounded hover:bg-gray-100">
+        Shop Gadgets
+      </a>
+    </section>
+
+    <section id="shop" class="max-w-6xl mx-auto px-4 py-8">
+      <h2 class="text-2xl font-bold mb-6 text-center">Our Latest Drops</h2>
+      <div class="flex justify-center space-x-3 mb-6 overflow-x-auto pb-2">
+        <button data-filter="all" class="filter-btn bg-indigo-600 text-white px-3 py-1 rounded">All</button>
+        <button data-filter="Audio" class="filter-btn bg-white px-3 py-1 rounded border">Audio</button>
+        <button data-filter="Wearables" class="filter-btn bg-white px-3 py-1 rounded border">Wearables</button>
+        <button data-filter="Computing" class="filter-btn bg-white px-3 py-1 rounded border">Computing</button>
+        <button data-filter="Accessory" class="filter-btn bg-white px-3 py-1 rounded border">Accessories</button>
+      </div>
+      <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </section>
+  </main>
+
+  <footer class="bg-gray-800 text-white mt-8">
+    <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+      <div>
+        <h4 class="text-lg font-bold mb-2 text-indigo-400">TechDrop</h4>
+        <p>Your source for reliable electronics.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Shop</h4>
+        <ul>
+          <li><a href="#shop" class="hover:text-white">Headphones</a></li>
+          <li><a href="#shop" class="hover:text-white">Watches</a></li>
+          <li><a href="#shop" class="hover:text-white">Cameras</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Support</h4>
+        <ul>
+          <li><a href="#" class="hover:text-white">Warranty</a></li>
+          <li><a href="#" class="hover:text-white">Downloads</a></li>
+          <li><a href="#" class="hover:text-white">Service</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Contact</h4>
+        <p>Email: support@techdrop.com</p>
+        <p>Phone: 888105452</p>
+        <p>Mysuru-570006</p>
+      </div>
+    </div>
+    <div class="text-center text-xs text-gray-400 py-2 border-t border-gray-700">
+      © 2025 TechDrop
+    </div>
+  </footer>
+
+  <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden">
+    <div id="cart-drawer" class="fixed right-0 top-0 h-full w-full md:w-80 bg-white shadow transform translate-x-full transition">
+      <div class="p-4 flex flex-col h-full">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h3 class="text-lg font-bold">Your Cart (<span id="modal-cart-count">0</span>)</h3>
+          <button id="close-cart-button" class="p-1">✖</button>
+        </div>
+        <div id="cart-items" class="flex-grow space-y-2">
+          <p id="empty-cart-message" class="text-gray-500 text-center mt-10 hidden">Cart is empty.</p>
+        </div>
+        <div class="border-t pt-3">
+          <div class="flex justify-between font-bold mb-3">
+            <span>Total:</span>
+            <span id="cart-total">₹0.00</span>
+          </div>
+          <button id="checkout-button" disabled class="w-full py-2 bg-indigo-600 text-white rounded disabled:opacity-50">
+            Checkout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+        { id: 201, name: "Noise Cancelling Headphones", price: 6999, category: "Audio", image: "https://tse2.mm.bing.net/th/id/OIP.RBbDLx0MtdX7F54FC7rXagHaHa?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { id: 202, name: "Smart Fitness Watch", price: 4299, category: "Wearables", image: "https://i5.walmartimages.com/asr/220802f0-988a-4593-927a-1c44350906a8_1.6763539a2a35a654d9d2856ec6c2ec6a.png?odnWidth=1000&odnHeight=1000&odnBg=ffffff" },
+        { id: 203, name: "Portable 10K mAh Power Bank", price: 1750, category: "Accessory", image: "https://microless.com/cdn/products/4a1571947d2c29962c4196f8f50d085c-hi.jpg" },
+        { id: 204, name: "Wireless Charging Pad", price: 1299, category: "Accessory", image: "https://tse4.mm.bing.net/th/id/OIP.a_dcPae5I3EN8TWK39rKBgHaHa?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { id: 205, name: "4K Pocket Action Camera", price: 11500, category: "Computing", image: "https://i5.walmartimages.com/seo/4K-Ultra-HD-Pocket-Action-Camera-270-Rotatable-Lens-Multi-Function-Shooting-Modes-Portable-Design-Long-Battery-Life_f60cda9d-8440-4e9a-8c93-abf5f60d8b2b.64f595ce63530df7f7c767f9cadbc112.jpeg" },
+        { id: 206, name: "Mini Bluetooth Speaker", price: 2999, category: "Audio", image: "https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1615566632-soundcore-mini-3-1615566615.jpg?crop=1xw:1xh;center,top&resize=980:*" },
+        { id: 207, name: "10-inch Productivity Tablet", price: 18999, category: "Computing", image: "https://images-na.ssl-images-amazon.com/images/I/71B-5ZUUl3L._AC_SL1500_.jpg" },
+        { id: 208, name: "Sport Activity Tracker Band", price: 1099, category: "Wearables", image: "https://images-na.ssl-images-amazon.com/images/I/615-sOndCzL._AC_SX522_.jpg" },
+    ];
+
+    let cart = [];
+    const productGrid = document.getElementById('product-grid');
+    const cartButton = document.getElementById('cart-button');
+    const cartModal = document.getElementById('cart-modal');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const closeCartButton = document.getElementById('close-cart-button');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartCountBadge = document.getElementById('cart-count');
+    const modalCartCount = document.getElementById('modal-cart-count');
+    const cartTotalDisplay = document.getElementById('cart-total');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+    const checkoutButton = document.getElementById('checkout-button');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    function calculateTotal() {
+      return cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+    }
+
+    function renderCart() {
+      cartItemsContainer.innerHTML = '';
+      if (cart.length === 0) {
+        emptyCartMessage.classList.remove('hidden');
+        checkoutButton.disabled = true;
+      } else {
+        emptyCartMessage.classList.add('hidden');
+        checkoutButton.disabled = false;
+        cart.forEach(item => {
+          const product = products.find(p => p.id === item.id);
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-2 bg-gray-100 rounded';
+          div.innerHTML = `
+            <span>${item.name} (x${item.quantity})</span>
+            <span>₹${item.price * item.quantity}</span>
+          `;
+          cartItemsContainer.appendChild(div);
+        });
+      }
+      cartTotalDisplay.textContent = `₹${calculateTotal()}`;
+      const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+      cartCountBadge.textContent = totalQty;
+      modalCartCount.textContent = totalQty;
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      const existing = cart.find(i => i.id === id);
+      if (existing) existing.quantity++;
+      else cart.push({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+      renderCart();
+      cartButton.classList.add('animate-flash');
+      setTimeout(() => cartButton.classList.remove('animate-flash'), 300);
+    }
+
+    function createProductCard(p) {
+      return `
+        <div class="bg-white rounded shadow p-3" data-category="${p.category}">
+          <img src="${p.image}" alt="${p.name}" class="w-full h-40 object-cover mb-2">
+          <h3 class="font-bold">${p.name}</h3>
+          <p>₹${p.price}</p>
+          <button onclick="addToCart(${p.id})" class="mt-2 w-full bg-indigo-600 text-white py-1 rounded">Add to Cart</button>
+        </div>
+      `;
+    }
+
+    function renderProducts(cat = 'all') {
+      let filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+      productGrid.innerHTML = filtered.map(createProductCard).join('');
+    }
+
+    function toggleCart() {
+      if (cartModal.classList.contains('hidden')) {
+        cartModal.classList.remove('hidden');
+        cartDrawer.classList.remove('translate-x-full');
+      } else {
+        cartModal.classList.add('hidden');
+        cartDrawer.classList.add('translate-x-full');
+      }
+    }
+
+    cartButton.addEventListener('click', toggleCart);
+    closeCartButton.addEventListener('click', toggleCart);
+    cartModal.addEventListener('click', e => { if (e.target === cartModal) toggleCart(); });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        filterButtons.forEach(b => b.className = "filter-btn bg-white px-3 py-1 rounded border");
+        this.className = "filter-btn bg-indigo-600 text-white px-3 py-1 rounded";
+        renderProducts(this.getAttribute('data-filter'));
+      });
+    });
+
+    checkoutButton.addEventListener('click', () => {
+      cartItemsContainer.innerHTML = '<p class="text-green-600 text-center">Order placed!</p>';
+      cart = [];
+      renderCart();
+    });
+
+    window.onload = () => { renderProducts(); renderCart(); };
+  </script>
+</body>
+</html>
